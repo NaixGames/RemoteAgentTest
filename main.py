@@ -13,6 +13,9 @@ from google.genai import types
 
 client = genai.Client(api_key = api_key)
 
+from prompts import system_prompt
+from config import GLOBAL_TEMPERATURE
+
 def get_user_input():
     parser = argparse.ArgumentParser(description="Chatbot")
     parser.add_argument("user_prompt", type=str, help="User prompt")
@@ -57,7 +60,16 @@ def main():
     if (question == None or question == ""):
         raise Exception("No question Given")
     
-    response = client.models.generate_content(model='gemini-2.5-flash', contents=messages)
+    config = types.GenerateContentConfig(
+        system_instruction=system_prompt, 
+        temperature=GLOBAL_TEMPERATURE
+    )
+    
+    response = client.models.generate_content(
+        model='gemini-2.5-flash', 
+        contents=messages,
+        config=config
+    )
     
     get_usage_info(response, parser_args)
     get_response_text(response)
