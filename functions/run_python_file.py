@@ -1,6 +1,9 @@
 import os
 import subprocess
 
+from google.genai import types
+
+
 import sys
 sys.path.append(".")
 from config import EXECUTION_TIMEOUT
@@ -45,3 +48,24 @@ def run_python_file(working_directory: str, file_path: str, args: list[str] | No
 
     except BaseException as e:
         return f'Error: {e}'
+    
+
+schema_run_python_file = types.FunctionDeclaration(
+    name = "run_python_file",
+    description="Runs a python script, allowing to pass arguments in an array." ,
+    parameters=types.Schema(
+        type=types.Type.OBJECT,
+        properties={
+            "file_path": types.Schema(
+                type=types.Type.STRING,
+                description="Path to the python script we want to run, relative to the working directory",
+            ),
+            "args" : types.Schema(
+                type=types.Type.ARRAY,
+                description = "An array of arguments that can be used to run the python script",
+                items = types.Schema(type=types.Type.STRING),
+            ),
+        },
+        required=["file_path"]
+    ),
+)

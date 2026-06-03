@@ -1,4 +1,5 @@
 import os
+from google.genai import types
 
 import sys
 sys.path.append(".")
@@ -31,3 +32,24 @@ def write_file(working_directory: str, file_path: str, content: str) -> str:
 
     except BaseException as e:
         return f'Error: {e}'
+    
+
+
+schema_write_file= types.FunctionDeclaration(
+    name = "write_file",
+    description="Creates a file with the given content on disk",
+    parameters=types.Schema(
+        type=types.Type.OBJECT,
+        properties={
+            "file_path": types.Schema(
+                type=types.Type.STRING,
+                description="Path to the file we create, relative to the working directory",
+            ),
+            "content": types.Schema(
+                type=types.Type.STRING,
+                description="The content the created file will have",
+            )
+        },
+        required=["file_path", "content"]
+    ),
+)

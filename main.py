@@ -16,6 +16,8 @@ client = genai.Client(api_key = api_key)
 from prompts import system_prompt
 from config import GLOBAL_TEMPERATURE
 
+from functions.call_function import available_functions
+
 def get_user_input():
     parser = argparse.ArgumentParser(description="Chatbot")
     parser.add_argument("user_prompt", type=str, help="User prompt")
@@ -44,7 +46,13 @@ def get_usage_info(response, parser_args):
 
 
 def get_response_text(response):
-    print(response.text)
+    if (response.function_calls != None and len(response.function_calls) > 0):
+        ans = ""
+        for call in response.function_calls:
+            ans += f"Calling function: {call.name}({call.args})\n"
+
+        return ans
+    return response.text
 
 
 
@@ -62,7 +70,8 @@ def main():
     
     config = types.GenerateContentConfig(
         system_instruction=system_prompt, 
-        temperature=GLOBAL_TEMPERATURE
+        temperature=GLOBAL_TEMPERATURE,
+        tools = [available_functions]
     )
     
     response = client.models.generate_content(
@@ -72,7 +81,7 @@ def main():
     )
     
     get_usage_info(response, parser_args)
-    get_response_text(response)
+    print(get_response_text(response))
 
 
 if __name__ == "__main__":

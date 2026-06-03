@@ -1,4 +1,5 @@
 import os
+from google.genai import types
 
 import sys
 sys.path.append(".")
@@ -33,3 +34,19 @@ def get_file_content(working_directory : str, file_path : str):
 
     except BaseException as e:
         return f'Error: {e}' 
+
+
+schema_get_file_content = types.FunctionDeclaration(
+    name = "get_file_content",
+    description="Provides the first 10000 characters of a file, when seen as a string.",
+    parameters=types.Schema(
+        type=types.Type.OBJECT,
+        properties={
+            "file_path": types.Schema(
+                type=types.Type.STRING,
+                description="Path to the file we want the content, relative to the working directory",
+            ),
+        },
+        required=["file_path"]
+    ),
+)

@@ -1,5 +1,5 @@
 import os
-
+from google.genai import types
 
 def get_directory_info(directory: str) -> str:
     #atm I will hope and pray the directory is a real directory (which should be with the checks below)
@@ -34,3 +34,19 @@ def get_files_info(working_directory: str, directory: str = ".") -> str:
 
     except BaseException as e:
         return f'Error: {e}'
+    
+
+
+schema_get_files_info = types.FunctionDeclaration(
+    name = "get_files_info",
+    description="Lists files in a specified directory relative to the working directory, providing file size and directory status",
+    parameters=types.Schema(
+        type=types.Type.OBJECT,
+        properties={
+            "directory": types.Schema(
+                type=types.Type.STRING,
+                description="Directory path to list files from, relative to the working directory (default is the working directory itself)",
+            ),
+        },
+    ),
+)
