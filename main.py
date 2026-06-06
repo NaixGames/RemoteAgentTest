@@ -16,7 +16,7 @@ client = genai.Client(api_key = api_key)
 from prompts import system_prompt
 from config import GLOBAL_TEMPERATURE
 
-from functions.call_function import available_functions
+from functions.call_function import available_functions, call_function
 
 def get_user_input():
     parser = argparse.ArgumentParser(description="Chatbot")
@@ -45,13 +45,25 @@ def get_usage_info(response, parser_args):
     print(f"Response tokens: {usage_data.candidates_token_count}")
 
 
-def get_response_text(response):
+def process_response(response, parser_args, result_history):
     if (response.function_calls != None and len(response.function_calls) > 0):
-        ans = ""
-        for call in response.function_calls:
-            ans += f"Calling function: {call.name}({call.args})\n"
+        func_res = call_function(response.function_calls, parser_args.verbose)
+        
+        if (func_res.parts == None):
+            raise Exception("function call result has empty parts. This is a bug")
+        
+        if (func_res.parts[0].function_response == None):
+            raise Exception("function call result has empty function response. This is a bug.")
+        
+        if (func_res.parts[0].function_response.response == None):
+            raise Exception("function call result has empty response field. This is a bug.")
+        
+        if (parser_args.verbose):
+            print(f"-> {func_res.parts[0].function_response.response}")
 
-        return ans
+        result_history.append(func_res.parts[0])
+        return "Function call processed"
+        
     return response.text
 
 
@@ -64,6 +76,8 @@ def main():
     question = parser_args.user_prompt
 
     messages = parse_question_with_context(question)
+
+    result_history = []
 
     if (question == None or question == ""):
         raise Exception("No question Given")
@@ -81,7 +95,7 @@ def main():
     )
     
     get_usage_info(response, parser_args)
-    print(get_response_text(response))
+    print(process_response(response, parser_args, result_history))
 
 
 if __name__ == "__main__":
