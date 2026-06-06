@@ -47,22 +47,23 @@ def get_usage_info(response, parser_args):
 
 def process_response(response, parser_args, result_history):
     if (response.function_calls != None and len(response.function_calls) > 0):
-        func_res = call_function(response.function_calls, parser_args.verbose)
-        
-        if (func_res.parts == None):
-            raise Exception("function call result has empty parts. This is a bug")
-        
-        if (func_res.parts[0].function_response == None):
-            raise Exception("function call result has empty function response. This is a bug.")
-        
-        if (func_res.parts[0].function_response.response == None):
-            raise Exception("function call result has empty response field. This is a bug.")
-        
-        if (parser_args.verbose):
-            print(f"-> {func_res.parts[0].function_response.response}")
+        for call in response.function_calls:
+            func_res = call_function(call, parser_args.verbose)
+            
+            if (func_res.parts == None):
+                raise Exception("function call result has empty parts. This is a bug")
+            
+            if (func_res.parts[0].function_response == None):
+                raise Exception("function call result has empty function response. This is a bug.")
+            
+            if (func_res.parts[0].function_response.response == None):
+                raise Exception("function call result has empty response field. This is a bug.")
+            
+            if (parser_args.verbose):
+                print(f"-> {func_res.parts[0].function_response.response}")
 
-        result_history.append(func_res.parts[0])
-        return "Function call processed"
+            result_history.append(func_res.parts[0])
+        return "Function calls processed"
         
     return response.text
 
