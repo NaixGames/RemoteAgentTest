@@ -96,7 +96,9 @@ def main():
     )
     
     get_usage_info(response, parser_args)
-    print(process_response(response, parser_args, result_history))
+    
+    resp = process_response(response, parser_args, result_history)
+    print(resp.replace("\'", "'"))
 
 
 if __name__ == "__main__":
