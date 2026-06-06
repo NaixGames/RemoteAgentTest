@@ -61,6 +61,7 @@ def process_response(response, parser_args, result_history):
             
             if (parser_args.verbose):
                 print(f"-> {func_res.parts[0].function_response.response}")
+                print(f"Processed output: {func_res.parts[0].function_response.response["result"]}")
 
             result_history.append(func_res.parts[0])
         return "Function calls processed"
