@@ -90,16 +90,33 @@ def main():
         tools = [available_functions]
     )
     
-    response = client.models.generate_content(
-        model='gemini-2.5-flash', 
-        contents=messages,
-        config=config
-    )
-    
-    get_usage_info(response, parser_args)
-    
-    resp = process_response(response, parser_args, result_history)
-    print(resp.replace("\'", "'"))
+
+    for i in range(0,15):
+        response = client.models.generate_content(
+            model='gemini-2.5-flash', 
+            contents=messages,
+            config=config
+        )
+
+        print("Agent loop iteration " + str(i))
+        get_usage_info(response, parser_args)
+
+        if (response.function_calls == None or len(response.function_calls) == 0):
+            print(response.text)
+            print("Task completed")
+            exit(0)
+        
+        if response.candidates != None and len(response.candidates) > 0:
+            for cand in response.candidates:
+                messages.append(cand.content)
+
+        resp = process_response(response, parser_args, result_history)
+        print(resp.replace("\'", "'"))
+
+        messages.append(types.Content(role="user", parts=[types.Part(text=resp)]))
+
+    print("task not completed")
+    exit(1)
 
 
 if __name__ == "__main__":
